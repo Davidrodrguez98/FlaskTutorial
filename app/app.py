@@ -1,6 +1,16 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for, redirect
+from werkzeug.utils import redirect
 
 app = Flask(__name__)
+
+@app.before_request
+def before_request():
+    print("Before Request")
+
+@app.after_request
+def after_request(response):
+    print("After Request")
+    return response
 
 @app.route('/')
 def index():
@@ -30,8 +40,13 @@ def query_string():
     print(request.args.get('Param1'))
     return "Ok"
 
+def pageNotFound(error):
+    # return render_template('404.html'), 404
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.add_url_rule('/query_string', view_func=query_string)
+    app.register_error_handler(404, pageNotFound)
     app.run(debug=True)
 
 
