@@ -1,7 +1,15 @@
-from flask import Flask, render_template, request, url_for, redirect
-from werkzeug.utils import redirect
+from flask import Flask, render_template, request, url_for, redirect, jsonify
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
+
+# MySQL connection
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'ucasalud'
+
+connection = MySQL(app)
 
 @app.before_request
 def before_request():
@@ -39,6 +47,21 @@ def query_string():
     print(request.args)
     print(request.args.get('Param1'))
     return "Ok"
+
+@app.route('/users')
+def list_players():
+    data = {}
+    try:
+        db = connection.connection.cursor()
+        sql = "SELECT name, dtype FROM users"
+        db.execute(sql)
+        users = db.fetchall()
+        # print(users)
+        data['users'] = users
+        data['message'] = 'Success'
+    except Exception as ex:
+        data['message'] = 'Error'
+    return jsonify(data)
 
 def pageNotFound(error):
     # return render_template('404.html'), 404
